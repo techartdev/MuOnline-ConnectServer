@@ -23,25 +23,35 @@ namespace ConnectServer
     {
         public CSSocket connectServer;
 
+        public CSSocket supp1;
+        public CSSocket supp2;
+
         public MainWindow()
         {
             InitializeComponent();
             connectServer = new CSSocket(IPAddress.Parse("192.168.1.50"), 44405, 20);
+            connectServer.SendHello = true;
+            connectServer.WriteLogs = true;
+            connectServer.WriteDebugLogs = true;
+            connectServer.ProtocolType = System.Net.Sockets.ProtocolType.Tcp;
+
         }
 
         private void startServer_Click(object sender, RoutedEventArgs e)
         {
-
+            connectServer.Start();
+            serverStatus.Background = Brushes.Green;
         }
 
         private void stopServer_Click(object sender, RoutedEventArgs e)
         {
-
+            connectServer.Stop();
+            serverStatus.Background = Brushes.Red;
         }
 
         private void killConnections_Click(object sender, RoutedEventArgs e)
         {
-
+            connectServer.KillAllConnections();
         }
     }
 }

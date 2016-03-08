@@ -12,19 +12,22 @@ namespace ConnectServer
 
     public class Connection
     {
+        public IPAddress IpAddress { get; set; }
 
-        public CSSocket ParentServer;
-        public string IpAddress;
-        public int Index;
-        public Socket ConnectionSocket;
-        public byte[] DataBuffer;
+        public int cIndex { get; set; }
+
+        public byte[] DataBuffer { get; set; }
+
+        public CSSocket ParentServer { get; set; }
+
+        public Socket ConnectionSocket { get; set; }
 
         public Connection(Socket Socket, CSSocket Server)
         {
             DataBuffer = new byte[1024 * 512];
             ConnectionSocket = Socket;
             ParentServer = Server;
-            IpAddress = Regex.Match(ConnectionSocket.RemoteEndPoint.ToString(), "([0-9]+).([0-9]+).([0-9]+).([0-9]+)").Value;
+            IpAddress = (ConnectionSocket.RemoteEndPoint as IPEndPoint).Address;
         }
 
         public void StartReceiveData()
@@ -51,8 +54,11 @@ namespace ConnectServer
                 {
                     if (ConnectionSocket.EndReceive(ar) > 0)
                     {
-                        DataBuffer = MiscFunctions.TrimNullByteData(DataBuffer);
-                        Log.WriteLog(String.Format("Recived Data From[{0}][{1}][{2}]", Index, IpAddress, MiscFunctions.ByteArrayToString(DataBuffer)));
+                        DataBuffer = Helpers.TrimNullByteData(DataBuffer);
+
+                        if (ParentServer.WriteDebugLogs)
+                            Logs.WriteLog("black", "Recived Data From Index [{0}] IP [{1}] Data : [{2}]", cIndex, IpAddress, Helpers.ByteArrayToString(DataBuffer));
+
                         ProtocolCore.ProcessCSPacket(this, DataBuffer);
 
                         Array.Clear(DataBuffer, 0, DataBuffer.Length);
@@ -62,8 +68,11 @@ namespace ConnectServer
                 }
                 catch (Exception Ex)
                 {
-                    Log.WriteLog(String.Format("Lost Connection with index [{0}]. Closing Connection..", Index));
-                    Log.WriteLog(Ex.Message);
+                    if (ParentServer.WriteDebugLogs)
+                    {
+                        Logs.WriteLog("red", "Lost Connection with index [{0}]. Closing Connection..", cIndex);
+                        Logs.WriteLog("red", Ex.Message);
+                    }
                     this.Close();
                 }
             }
@@ -74,20 +83,27 @@ namespace ConnectServer
             try
             {
                 ConnectionSocket.Send(Data, 0, Data.Length, SocketFlags.None);
-                Log.WriteLog(String.Format("Send Data To[{0}][{1}]", Index, IpAddress));
+
+                if (ParentServer.WriteDebugLogs)
+                    Logs.WriteLog("black", "Send Data To[{0}][{1}]", cIndex, IpAddress);
+
                 Array.Clear(DataBuffer, 0, DataBuffer.Length);
             }
             catch (Exception Ex)
             {
-                 Log.WriteLog(Ex.Message);
+                if (ParentServer.WriteDebugLogs)
+                    Logs.WriteLog("red", Ex.Message);
             }
         }
 
         public void SendData()
         {
-            DataBuffer = MiscFunctions.TrimNullByteData(DataBuffer);
+            DataBuffer = Helpers.TrimNullByteData(DataBuffer);
             ConnectionSocket.Send(DataBuffer, 0, DataBuffer.Length, SocketFlags.None);
-            Log.WriteLog(String.Format("Send Data To Index[{0}][{1}]", Index, IpAddress));
+
+            if (ParentServer.WriteDebugLogs)
+                Logs.WriteLog("black", "Send Data To Index[{0}][{1}]", cIndex, IpAddress);
+
             Array.Clear(DataBuffer, 0, DataBuffer.Length);
         }
 
@@ -97,12 +113,16 @@ namespace ConnectServer
             {
                 ConnectionSocket.Shutdown(SocketShutdown.Both);
                 ConnectionSocket.Close();
-                Log.WriteLog(String.Format("Connection Closed Index[{0}]", Index));
+
+                if (ParentServer.WriteDebugLogs)
+                    Logs.WriteLog("black", "Connection with index [{0}] closed.", cIndex);
+
                 ParentServer.CloseConnection(this);
             }
             catch (Exception Ex)
             {
-                Log.WriteLog(Ex.Message);
+                if (ParentServer.WriteDebugLogs)
+                    Logs.WriteLog("red", Ex.Message);
             }
         }
 

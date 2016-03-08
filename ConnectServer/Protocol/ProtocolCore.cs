@@ -17,12 +17,12 @@ namespace ConnectServer
     public static class ProtocolCore
     {
         private static MainWindow mainWindow = (MainWindow)Application.Current.MainWindow;
-        
+
         public static void ProcessCSPacket(Connection conn, byte[] DataBuffer)
         {
             if (DataBuffer.Length < 3)
                 return;
-            
+
             switch (DataBuffer[2])
             {
                 case 0x01:
@@ -68,7 +68,7 @@ namespace ConnectServer
                     break;
                 default:
                     return;
-            }  
+            }
         }
 
         public static void SendServerList(int cIndex, byte[] data)
@@ -127,7 +127,7 @@ namespace ConnectServer
             }
             else
             {
-                Log.WriteLog("[ConnectServer] :: No active server!");
+                Logs.WriteLog("black", "[ConnectServer] :: No active server!");
                 mainWindow.connectServer.CloseConnection(cIndex);
             }
 
@@ -143,7 +143,7 @@ namespace ConnectServer
 
             Application.Current.Dispatcher.Invoke(delegate
             {
-                mainWindow.connectServer.DataSend(MiscFunctions.GetStructBytes(hello), cIndex);
+                mainWindow.connectServer.DataSend(Helpers.GetStructBytes(hello), cIndex);
             });
         }
 
@@ -160,7 +160,7 @@ namespace ConnectServer
 
             Application.Current.Dispatcher.Invoke(delegate
             {
-                mainWindow.connectServer.DataSend(MiscFunctions.GetStructBytes(conInfo), cIndex);
+                mainWindow.connectServer.DataSend(Helpers.GetStructBytes(conInfo), cIndex);
             });
         }
     }

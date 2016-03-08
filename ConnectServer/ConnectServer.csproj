@@ -55,10 +55,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Log.cs" />
-    <Compile Include="ProtocolCore.cs" />
-    <Compile Include="Socket.cs" />
-    <Compile Include="Structs.cs" />
+    <Compile Include="Misc\Logs.cs" />
+    <Compile Include="Protocol\ProtocolCore.cs" />
+    <Compile Include="Network\Socket.cs" />
+    <Compile Include="Protocol\Structs.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -67,14 +67,14 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ConnectServer.cs" />
+    <Compile Include="Network\Connection.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MiscFunctions.cs" />
+    <Compile Include="Helpers\Helpers.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

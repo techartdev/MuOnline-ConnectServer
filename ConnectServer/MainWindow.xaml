@@ -5,21 +5,30 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ConnectServer"
         mc:Ignorable="d"
-        Title="Connect Server by TheLast" Height="600" Width="800">
+        Title="ConnectServer by TheLast" Height="600" Width="800">
     <Grid>
         <Menu x:Name="menu" Height="19" VerticalAlignment="Top">
             <MenuItem Header="File"/>
         </Menu>
 
-        <Button x:Name="startServer" Content="Start" HorizontalAlignment="Left" Margin="10,31,0,0" VerticalAlignment="Top" Width="75" Click="startServer_Click"/>
-        <Button x:Name="stopServer" Content="Stop" HorizontalAlignment="Left" Margin="105,31,0,0" VerticalAlignment="Top" Width="75" Click="stopServer_Click"/>
-        <Button x:Name="killConnections" Content="Kill All Connections" HorizontalAlignment="Left" Margin="282,31,0,0" VerticalAlignment="Top" Width="129" Click="killConnections_Click"/>
+        <Button x:Name="startServer" Content="Start" HorizontalAlignment="Left" Margin="10,35,0,0" VerticalAlignment="Top" Width="75" Click="startServer_Click"/>
+        <Button x:Name="stopServer" Content="Stop" HorizontalAlignment="Left" Margin="105,35,0,0" VerticalAlignment="Top" Width="75" Click="stopServer_Click"/>
+        <Button x:Name="killConnections" Content="Kill All Connections" HorizontalAlignment="Left" Margin="282,35,0,0" VerticalAlignment="Top" Width="129" Click="killConnections_Click"/>
 
-        
-        <Border x:Name="serverStatus"  Background="Red" HorizontalAlignment="Left" Height="20" Margin="199,31,0,0" VerticalAlignment="Top" Width="31"/>
-        <TextBlock HorizontalAlignment="Left" Margin="454,33,0,0" TextWrapping="Wrap" Text="Connected :" VerticalAlignment="Top"/>
-        <TextBlock x:Name="connectedUsers" HorizontalAlignment="Left" Margin="522,33,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top"/>
 
-        <RichTextBox x:Name="csLogsBox" Margin="10,64,10,10"/>
+        <Border x:Name="serverStatus"  Background="Red" HorizontalAlignment="Left" Height="20" Margin="199,35,0,0" VerticalAlignment="Top" Width="31"/>
+        <TextBlock HorizontalAlignment="Left" Margin="454,37,0,0" TextWrapping="Wrap" Text="Connected :" VerticalAlignment="Top"/>
+        <TextBlock x:Name="connectedUsers" HorizontalAlignment="Left" Margin="522,37,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top"/>
+
+        <TabControl Margin="0,71,0,0">
+            <TabItem Header="Logs">
+                <Grid>
+                    <RichTextBox x:Name="csLogsBox" Margin="10"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Configuration">
+
+            </TabItem>
+        </TabControl>
     </Grid>
 </Window>

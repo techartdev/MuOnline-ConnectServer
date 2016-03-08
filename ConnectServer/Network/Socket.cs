@@ -6,27 +6,36 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace ConnectServer
 {
     public class CSSocket
     {
         #region Public Properties
-        [DefaultValue(44405)]
         public int Port { get; set; }
-
-        [DefaultValue(20)]
+        
         public int MaxConnections { get; set; }
 
         public Dictionary<int, Connection> ConnectionList { get; set; }
 
         public IPAddress IPAddress { get; set; }
+
+        public bool SendHello { get; set; }
+        
+        public bool WriteLogs { get; set; }
+        
+        public bool WriteDebugLogs { get; set; }
+
+        public ProtocolType ProtocolType { get; set; }
         #endregion
 
         #region Private Properties
         private bool IsAlive = false;
 
         private Socket SocketServer;
+
+        private MainWindow mainWindow = (MainWindow)Application.Current.MainWindow;
         #endregion
 
         public CSSocket(IPAddress IPAddress, int Port, int MaxConnections)
@@ -37,32 +46,48 @@ namespace ConnectServer
             ConnectionList = new Dictionary<int, Connection>();
         }
 
+        /// <summary>
+        /// Starts the socket listener
+        /// </summary>
         public void Start()
         {
             try
             {
-                Log.WriteLog("Starting Server");
-                SocketServer = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                if (WriteLogs)
+                    Logs.WriteLog("black", "Starting Server");
+
+                SocketServer = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType);
                 SocketServer.Bind(new IPEndPoint(IPAddress, Port));
 
                 SocketServer.Listen(10);
 
                 //FormControlUpdater.UpdateServerStatus(1);
                 //FormControlUpdater.UpdateConnectionCount(ConnectionsList.Count);
+
+
                 SocketServer.BeginAccept(new AsyncCallback(OnConnect), SocketServer);
-                Log.WriteLog(String.Format("Socket Listener Succesfully Running On Port[{0}]", "green", Port));
+                if (WriteLogs)
+                    Logs.WriteLog("green", "Socket Listener Succesfully Running On Port [{0}]", Port);
+
                 IsAlive = true;
             }
             catch (Exception Ex)
             {
-                Log.WriteLog(String.Format("Failed To Set Up Connection Listener On Port [{0}]", "red", Port));
-                Log.WriteLog(Ex.Message, "red");
+                if (WriteDebugLogs)
+                {
+                    Logs.WriteLog("red", "Failed To Set Up Connection Listener On Port [{0}]", Port);
+                    Logs.WriteLog("red", Ex.Message);
+                }
             }
         }
 
+        /// <summary>
+        /// Stops the socket listener
+        /// </summary>
         public void Stop()
         {
-            Log.WriteLog("Stoping Socket Listener");
+            if (WriteLogs)
+                Logs.WriteLog("black", "Stoping Socket Listener");
 
             if (SocketServer != null)
             {
@@ -73,7 +98,8 @@ namespace ConnectServer
             KillAllConnections();
             SocketServer = null;
 
-            Log.WriteLog("All Connections Killed");
+            if (WriteLogs)
+                Logs.WriteLog("black", "All Connections Killed");
         }
 
         private void OnConnect(IAsyncResult ar)
@@ -83,12 +109,13 @@ namespace ConnectServer
                 try
                 {
                     Socket socket = SocketServer.EndAccept(ar);
-                    string connectionIP = socket.RemoteEndPoint.ToString();
+                    IPAddress connectionIP = (socket.RemoteEndPoint as IPEndPoint).Address;
 
                     if (ConnectionList.Count == MaxConnections)
                     {
                         socket.Close();
-                        Log.WriteLog(String.Format("Refused Connection Request From [{0}] Max Amount Of Connections [{1}] Has Been Reached.", connectionIP, MaxConnections));
+                        if (WriteLogs)
+                            Logs.WriteLog("black", "Refused Connection from IP [{0}] because the maximum connections count [{1}] is reached.", connectionIP, MaxConnections);
                     }
                     else
                     {
@@ -98,7 +125,8 @@ namespace ConnectServer
                 }
                 catch (Exception Ex)
                 {
-                    Log.WriteLog(Ex.Message);
+                    if (WriteDebugLogs)
+                        Logs.WriteLog("red", Ex.Message);
                 }
 
                 SocketServer.BeginAccept(new AsyncCallback(OnConnect), SocketServer);
@@ -110,32 +138,24 @@ namespace ConnectServer
             try
             {
                 Connection conn = new Connection(socket, this);
-                int index = MiscFunctions.GetFirstIndexFromList(ConnectionList);
-                conn.Index = index;
+                int index = Helpers.GetFirstIndexFromList(ConnectionList);
+                conn.cIndex = index;
                 ConnectionList.Add(index, conn);
                 conn.StartReceiveData();
                 //FormControlUpdater.UpdateConnectionCount(ConnectionsList.Count);
-                Log.WriteLog("Created connection for IP [{0}]", "green", conn.IpAddress);
+                if (WriteLogs)
+                    Logs.WriteLog("green", "Created connection for IP [{0}]", conn.IpAddress);
 
-                ProtocolCore.SendHelloMessage(index);
+                if (SendHello)
+                {
+                    ProtocolCore.SendHelloMessage(index);
+                }
             }
             catch (Exception Ex)
             {
-                Log.WriteLog(Ex.Message);
+                if (WriteDebugLogs)
+                    Logs.WriteLog("red", Ex.Message);
             }
-        }
-
-        public Connection GetInstance(int Index)
-        {
-            foreach (KeyValuePair<int, Connection> Item in ConnectionList)
-            {
-                if (Item.Key.Equals(Index))
-                {
-                    return Item.Value;
-                }
-            }
-            Log.WriteLog(String.Format("Connection with index [{0}] is not existing.", "red", Index));
-            return null;
         }
 
         /// <summary>
@@ -176,6 +196,9 @@ namespace ConnectServer
             }
         }
 
+        /// <summary>
+        /// Kills all alive connections
+        /// </summary>
         public void KillAllConnections()
         {
             try
@@ -192,25 +215,35 @@ namespace ConnectServer
             }
             catch (Exception Ex)
             {
-                Log.WriteLog(Ex.Message, "red");
+                if (WriteDebugLogs)
+                    Logs.WriteLog("red", Ex.Message);
             }
         }
 
+        /// <summary>
+        /// Kill connection with specific index
+        /// </summary>
+        /// <param name="cIndex"></param>
         public void CloseConnection(int cIndex)
         {
             try
             {
                 ConnectionList[cIndex].Close();
                 ConnectionList.Remove(cIndex);
-
-                Log.WriteLog(string.Format("Closed Connection with index [{0}]", cIndex));
+                if (WriteLogs)
+                    Logs.WriteLog("black", "Closed Connection with index [{0}]", cIndex);
             }
             catch (Exception Ex)
             {
-                Log.WriteLog(Ex.Message, "red");
+                if (WriteDebugLogs)
+                    Logs.WriteLog("red", Ex.Message);
             }
         }
 
+        /// <summary>
+        /// Kill specific connection
+        /// </summary>
+        /// <param name="Connection"></param>
         public void CloseConnection(Connection Connection)
         {
             try
@@ -218,18 +251,21 @@ namespace ConnectServer
                 if (ConnectionList.Any(wr => wr.Value == Connection))
                 {
                     Connection.Close();
-                    ConnectionList.Remove(Connection.Index);
+                    ConnectionList.Remove(Connection.cIndex);
 
-                    Log.WriteLog(string.Format("Closed Connection with index [{0}] ", Connection.Index));
+                    if (WriteLogs)
+                        Logs.WriteLog("black", "Closed Connection with index [{0}] ", Connection.cIndex);
                 }
                 else
                 {
-                    Log.WriteLog("The connection can't be closed because is not existing.");
+                    if (WriteLogs)
+                        Logs.WriteLog("black", "The connection can't be closed because is not existing.");
                 }
             }
             catch (Exception Ex)
             {
-                Log.WriteLog(Ex.Message, "red");
+                if (WriteDebugLogs)
+                    Logs.WriteLog("red", Ex.Message);
             }
         }
     }

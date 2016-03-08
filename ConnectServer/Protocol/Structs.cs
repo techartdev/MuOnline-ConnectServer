@@ -34,16 +34,16 @@ namespace ConnectServer
         {
             c = 0xC2;
             HeadCode = headCode;
-            SizeH = MiscFunctions.SET_NUMBERH(size);
-            SizeL = MiscFunctions.SET_NUMBERL(size);
+            SizeH = Helpers.SET_NUMBERH(size);
+            SizeL = Helpers.SET_NUMBERL(size);
         }
 
         public void SetE(byte headCode, byte size)
         {
             c = 0xC4;
             HeadCode = headCode;
-            SizeH = MiscFunctions.SET_NUMBERH(size);
-            SizeL = MiscFunctions.SET_NUMBERL(size);
+            SizeH = Helpers.SET_NUMBERH(size);
+            SizeL = Helpers.SET_NUMBERL(size);
         }
 
         byte c;

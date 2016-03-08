@@ -10,9 +10,9 @@ using System.Windows.Media;
 
 namespace ConnectServer
 {
-    public static class Log
+    public static class Logs
     {
-        public static void WriteLog(string text, string color = "black", params object[] arg0)
+        public static void WriteLog(string color, string text, params object[] arg0)
         {
             Application.Current.Dispatcher.Invoke(delegate
             {

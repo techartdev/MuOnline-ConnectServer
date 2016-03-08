@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ConnectServer
 {
-    public static class MiscFunctions
+    public static class Helpers
     {
         public static int GetFirstIndexFromList<Z>(Dictionary<int, Z> list)
         {
