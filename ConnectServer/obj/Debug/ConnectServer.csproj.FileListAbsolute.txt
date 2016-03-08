@@ -1,0 +1,16 @@
+D:\MuNETProject\MuServer\ConnectServer\bin\Debug\ConnectServer.exe.config
+D:\MuNETProject\MuServer\ConnectServer\bin\Debug\ConnectServer.exe
+D:\MuNETProject\MuServer\ConnectServer\bin\Debug\ConnectServer.pdb
+D:\MuNETProject\MuServer\ConnectServer\obj\Debug\MainWindow.g.cs
+D:\MuNETProject\MuServer\ConnectServer\obj\Debug\App.g.cs
+D:\MuNETProject\MuServer\ConnectServer\obj\Debug\ConnectServer_MarkupCompile.cache
+D:\MuNETProject\MuServer\ConnectServer\obj\Debug\ConnectServer_MarkupCompile.lref
+D:\MuNETProject\MuServer\ConnectServer\obj\Debug\MainWindow.baml
+D:\MuNETProject\MuServer\ConnectServer\obj\Debug\ConnectServer.g.resources
+D:\MuNETProject\MuServer\ConnectServer\obj\Debug\ConnectServer.Properties.Resources.resources
+D:\MuNETProject\MuServer\ConnectServer\obj\Debug\ConnectServer.csproj.GenerateResource.Cache
+D:\MuNETProject\MuServer\ConnectServer\obj\Debug\ConnectServer.exe
+D:\MuNETProject\MuServer\ConnectServer\obj\Debug\ConnectServer.pdb
+D:\GitHub\MuOnline-ConnectServer\ConnectServer\bin\Debug\ConnectServer.exe.config
+D:\GitHub\MuOnline-ConnectServer\ConnectServer\obj\Debug\ConnectServer.exe
+D:\GitHub\MuOnline-ConnectServer\ConnectServer\obj\Debug\ConnectServer.pdb
