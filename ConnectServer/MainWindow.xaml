@@ -20,9 +20,17 @@
         <TextBlock HorizontalAlignment="Left" Margin="454,37,0,0" TextWrapping="Wrap" Text="Connected :" VerticalAlignment="Top"/>
         <TextBlock x:Name="connectedUsers" HorizontalAlignment="Left" Margin="522,37,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top"/>
 
-        <ListBox x:Name="serverList" HorizontalAlignment="Left" Margin="10,93,0,10" Width="207"/>
+        <ListBox x:Name="serverList" HorizontalAlignment="Left" MouseDoubleClick="serverList_MouseDoubleClick" Margin="10,93,0,10" Width="207">
+            <ListBox.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Edit Configuration" x:Name="editConfigMI" Click="editConfigMI_Click"/>
+                    <Separator/>
+                    <MenuItem Header="Remove Server" x:Name="removeServerMI" Click="removeServerMI_Click"/>
+                </ContextMenu>
+            </ListBox.ContextMenu>
+        </ListBox>
 
-        <TabControl Margin="222,71,10,10">
+        <TabControl Margin="222,71,10,10" x:Name="tabControl">
             <TabItem Header="Logs">
                 <Grid>
                     <RichTextBox x:Name="csLogsBox" Margin="10"/>
@@ -52,11 +60,12 @@
 
                     <TextBlock HorizontalAlignment="Left" Margin="276,204,0,0" TextWrapping="Wrap" Text="Port" VerticalAlignment="Top"/>
                     <TextBox x:Name="serverPort" HorizontalAlignment="Left" Height="23" Margin="276,225,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="170"/>
-                    
+
                     <RadioButton x:Name="showServer" Content="Show" IsChecked="True" HorizontalAlignment="Left" Margin="27,266,0,0" VerticalAlignment="Top"/>
-                    <RadioButton Content="Hide" HorizontalAlignment="Left" Margin="27,289,0,0" VerticalAlignment="Top"/>
+                    <RadioButton x:Name="hideServer" Content="Hide" HorizontalAlignment="Left" Margin="27,289,0,0" VerticalAlignment="Top"/>
 
                     <Button x:Name="addServer" Content="Add Server" HorizontalAlignment="Left" Margin="428,278,0,0" VerticalAlignment="Top" Width="93" Height="26" Click="addServer_Click"/>
+                    <Button x:Name="cancelEdit" Content="Cancel" Visibility="Hidden" HorizontalAlignment="Left" Margin="347,278,0,0" VerticalAlignment="Top" Width="64" Height="26" Click="cancelEdit_Click"/>
                 </Grid>
             </TabItem>
         </TabControl>

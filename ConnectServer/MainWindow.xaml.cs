@@ -39,12 +39,14 @@ namespace ConnectServer
         public int TCPRecvPort = 55558;
         public int UDPPort = 55557;
 
+        private bool editingServer = false;
+
         public MainWindow()
         {
             InitializeComponent();
 
             GSList = new List<GameServerItem>();
-
+            LoadSavedData();
             connectServer = new CSSocket(serverIP, CSPort, MaxConnections);
             connectServer.SendHello = true;
             connectServer.WriteLogs = true;
@@ -99,6 +101,7 @@ namespace ConnectServer
             if (File.Exists("ServerList.xml"))
             {
                 GSList = LoadGSList("ServerList.xml");
+                serverList.ItemsSource = null;
                 serverList.ItemsSource = GSList;
             }
         }
@@ -106,17 +109,49 @@ namespace ConnectServer
         private List<GameServerItem> LoadGSList(string path)
         {
             var stream = File.OpenRead(path);
-            var xml = new XmlSerializer(typeof(List<GameServerItem>));
-            List<GameServerItem> campaign = (List<GameServerItem>)xml.Deserialize(stream);
+            var xml = new XmlSerializer(typeof(List<GSSaveList>));
+            List<GSSaveList> saveList = (List<GSSaveList>)xml.Deserialize(stream);
             stream.Close();
-            return campaign;
+
+            List<GameServerItem> gsList = new List<GameServerItem>();
+            foreach (GSSaveList slItem in saveList)
+            {
+                GameServerItem gsi = new GameServerItem
+                {
+                    ServerName = slItem.ServerName,
+                    ServerCode = slItem.ServerCode,
+                    IPAddress = IPAddress.Parse(slItem.IPAddress),
+                    Port = slItem.Port,
+                    IsHidden = slItem.Show
+                };
+
+                gsList.Add(gsi);
+            }
+
+            return gsList;
         }
 
         private void SaveGSList(string filePath)
         {
+            List<GSSaveList> saveList = new List<GSSaveList>();
+
+            foreach (GameServerItem gsi in GSList)
+            {
+                GSSaveList gssl = new GSSaveList
+                {
+                    ServerCode = gsi.ServerCode,
+                    ServerName = gsi.ServerName,
+                    IPAddress = gsi.IPAddress.ToString(),
+                    Port = gsi.Port,
+                    Show = gsi.IsHidden
+                };
+
+                saveList.Add(gssl);
+            }
+
             var stream = File.Create(filePath);
-            var xml = new XmlSerializer(GSList.GetType());
-            xml.Serialize(stream, GSList);
+            var xml = new XmlSerializer(saveList.GetType());
+            xml.Serialize(stream, saveList);
             stream.Close();
         }
 
@@ -127,6 +162,12 @@ namespace ConnectServer
 
         private void startServer_Click(object sender, RoutedEventArgs e)
         {
+            if (GSList.Count == 0)
+            {
+                MessageBox.Show("Please, add at least 1 GameServer !", "Start ConnectServer", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             connectServer.Start();
             TCPRecv.Start();
             udpServer.Start();
@@ -150,31 +191,152 @@ namespace ConnectServer
         {
             File.Create("CSSettings.dat").Close();
 
+            serverIP = IPAddress.Parse(csIpAddress.Text);
+            MaxConnections = Convert.ToInt32(maxConnections.Text);
+
             string txt = "CSIPAddress=" + serverIP.ToString() + Environment.NewLine;
             txt += "MaxConnections=" + MaxConnections;
 
             File.WriteAllText("CSSettings.dat", txt);
+
+            MessageBox.Show("ConnectServer configuration saved !", "Save Changes", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void addServer_Click(object sender, RoutedEventArgs e)
         {
-            GameServerItem gsitem = new GameServerItem
+            if (!editingServer)
             {
-                ServerName = serverName.Text,
-                ServerCode = Convert.ToInt32(serverCode.Text),
-                IPAddress = IPAddress.Parse(serverIp.Text),
-                Port = Convert.ToInt32(serverPort.Text),
-                Percent = 1,
-                MaxUserCount = 100,
-                UserCount = 1,
-                IsHidden = showServer.IsChecked.Value,
-                IsAlive = true
-            };
+                GameServerItem gsitem = new GameServerItem
+                {
+                    ServerName = serverName.Text,
+                    ServerCode = Convert.ToInt32(serverCode.Text),
+                    IPAddress = IPAddress.Parse(serverIp.Text),
+                    Port = Convert.ToInt32(serverPort.Text),
+                    IsHidden = showServer.IsChecked.Value
+                };
 
-            GSList.Add(gsitem);
+                GSList.Add(gsitem);
+
+                serverList.ItemsSource = null;
+                serverList.ItemsSource = GSList;
+
+                SaveGSList("ServerList.xml");
+            }
+            else
+            {
+                int srvCode = Convert.ToInt32(serverCode.Text);
+                GameServerItem gsitem = GSList.FirstOrDefault(wr => wr.ServerCode == srvCode);
+
+                if (gsitem == null)
+                {
+                    addServer.Content = "Add Server";
+                    editingServer = false;
+                    cancelEdit.Visibility = Visibility.Hidden;
+                    return;
+                }
+
+                int index = GSList.IndexOf(gsitem);
+
+
+                gsitem.ServerName = serverName.Text;
+                gsitem.ServerCode = Convert.ToInt32(serverCode.Text);
+                gsitem.IPAddress = IPAddress.Parse(serverIp.Text);
+                gsitem.Port = Convert.ToInt32(serverPort.Text);
+                gsitem.IsHidden = showServer.IsChecked.Value;
+
+                GSList.RemoveAt(index);
+                GSList.Insert(index, gsitem);
+
+                serverList.ItemsSource = null;
+                serverList.ItemsSource = GSList;
+
+                SaveGSList("ServerList.xml");
+
+                addServer.Content = "Add Server";
+                editingServer = false;
+                cancelEdit.Visibility = Visibility.Hidden;
+            }
+
+            ClearConfigControls();
+        }
+
+        private void editConfigMI_Click(object sender, RoutedEventArgs e)
+        {
+            if (serverList.SelectedItems.Count == 0)
+                return;
+
+            GameServerItem gsi = serverList.SelectedItem as GameServerItem;
+
+            tabControl.SelectedIndex = 1;
+
+            serverName.Text = gsi.ServerName;
+            serverCode.Text = gsi.ServerCode.ToString();
+            serverIp.Text = gsi.IPAddress.ToString();
+            serverPort.Text = gsi.Port.ToString();
+            showServer.IsChecked = gsi.IsHidden;
+            hideServer.IsChecked = !gsi.IsHidden;
+
+            addServer.Content = "Save Changes";
+            editingServer = true;
+            cancelEdit.Visibility = Visibility.Visible;
+        }
+
+        private void serverList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (serverList.SelectedItems.Count == 0)
+                return;
+
+            GameServerItem gsi = serverList.SelectedItem as GameServerItem;
+
+            tabControl.SelectedIndex = 1;
+
+            serverName.Text = gsi.ServerName;
+            serverCode.Text = gsi.ServerCode.ToString();
+            serverIp.Text = gsi.IPAddress.ToString();
+            serverPort.Text = gsi.Port.ToString();
+            showServer.IsChecked = gsi.IsHidden;
+            hideServer.IsChecked = !gsi.IsHidden;
+
+            addServer.Content = "Save Changes";
+            editingServer = true;
+            cancelEdit.Visibility = Visibility.Visible;
+        }
+
+        private void ClearConfigControls()
+        {
+            serverName.Clear();
+            serverCode.Clear();
+            serverIp.Clear();
+            serverPort.Clear();
+            showServer.IsChecked = true;
+        }
+
+        private void removeServerMI_Click(object sender, RoutedEventArgs e)
+        {
+            if (serverList.SelectedItems.Count == 0)
+                return;
+
+            GameServerItem gsi = serverList.SelectedItem as GameServerItem;
+
+            if (MessageBox.Show(string.Format("Server [{0}] with Code [{1}] will be removed. Continue ?",
+                gsi.ServerName, gsi.ServerCode), "Delete GameServer", MessageBoxButton.YesNo,
+                MessageBoxImage.Warning) != MessageBoxResult.Yes)
+                return;
+
+            GSList.Remove(gsi);
+
+            serverList.ItemsSource = null;
             serverList.ItemsSource = GSList;
 
-            //SaveGSList("ServerList.xml");
+            SaveGSList("ServerList.xml");
+        }
+
+        private void cancelEdit_Click(object sender, RoutedEventArgs e)
+        {
+            addServer.Content = "Add Server";
+            editingServer = false;
+            cancelEdit.Visibility = Visibility.Hidden;
+            ClearConfigControls();
         }
     }
 }

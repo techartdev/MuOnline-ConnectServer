@@ -49,8 +49,6 @@ namespace ConnectServer
 
         public int Port { get; set; }
 
-        public bool Show { get; set; }
-
         public bool IsAlive
         {
             get
@@ -118,5 +116,18 @@ namespace ConnectServer
                 handler(this, new PropertyChangedEventArgs(propertyName));
             }
         }
+    }
+
+    public class GSSaveList
+    {
+        public string ServerName { get; set; }
+
+        public int ServerCode { get; set; }
+
+        public string IPAddress { get; set; }
+
+        public int Port { get; set; }
+
+        public bool Show { get; set; }
     }
 }
