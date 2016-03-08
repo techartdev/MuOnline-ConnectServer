@@ -18,7 +18,7 @@ namespace ConnectServer
         [DefaultValue(20)]
         public int MaxConnections { get; set; }
 
-        public Dictionary<int, CSConnection> ConnectionList { get; set; }
+        public Dictionary<int, Connection> ConnectionList { get; set; }
 
         public IPAddress IPAddress { get; set; }
         #endregion
@@ -34,7 +34,7 @@ namespace ConnectServer
             this.IPAddress = IPAddress;
             this.Port = Port;
             this.MaxConnections = MaxConnections;
-            ConnectionList = new Dictionary<int, CSConnection>();
+            ConnectionList = new Dictionary<int, Connection>();
         }
 
         public void Start()
@@ -48,15 +48,15 @@ namespace ConnectServer
                 SocketServer.Listen(10);
 
                 //FormControlUpdater.UpdateServerStatus(1);
-                //FormControlUpdater.UpdateCSConnectionCount(CSConnectionsList.Count);
+                //FormControlUpdater.UpdateConnectionCount(ConnectionsList.Count);
                 SocketServer.BeginAccept(new AsyncCallback(OnConnect), SocketServer);
-                Log.WriteLog(String.Format("Socket Listener Succesfully Running On Port[{0}]", Port));
+                Log.WriteLog(String.Format("Socket Listener Succesfully Running On Port[{0}]", "green", Port));
                 IsAlive = true;
             }
             catch (Exception Ex)
             {
-                Log.WriteLog(String.Format("Failed To Set Up CSConnection Listener On Port [{0}]", Port));
-                Log.WriteLog(Ex.Message);
+                Log.WriteLog(String.Format("Failed To Set Up Connection Listener On Port [{0}]", "red", Port));
+                Log.WriteLog(Ex.Message, "red");
             }
         }
 
@@ -70,9 +70,10 @@ namespace ConnectServer
                 IsAlive = false;
             }
 
-            Log.WriteLog("Close All CSConnections");
-            CloseAllCSConnections();
+            KillAllConnections();
             SocketServer = null;
+
+            Log.WriteLog("All Connections Killed");
         }
 
         private void OnConnect(IAsyncResult ar)
@@ -87,11 +88,11 @@ namespace ConnectServer
                     if (ConnectionList.Count == MaxConnections)
                     {
                         socket.Close();
-                        Log.WriteLog(String.Format("Refused CSConnection Request From [{0}] Max Amount Of CSConnections [{1}] Has Been Reached.", NewCSConnectionIP, MaxCSConnections));
+                        Log.WriteLog(String.Format("Refused Connection Request From [{0}] Max Amount Of Connections [{1}] Has Been Reached.", connectionIP, MaxConnections));
                     }
                     else
                     {
-                        CreateCSConnection(socket);
+                        CreateConnection(socket);
                     }
 
                 }
@@ -108,12 +109,12 @@ namespace ConnectServer
         {
             try
             {
-                CSConnection conn = new CSConnection(socket, this);
+                Connection conn = new Connection(socket, this);
                 int index = MiscFunctions.GetFirstIndexFromList(ConnectionList);
                 conn.Index = index;
                 ConnectionList.Add(index, conn);
                 conn.StartReceiveData();
-                //FormControlUpdater.UpdateCSConnectionCount(CSConnectionsList.Count);
+                //FormControlUpdater.UpdateConnectionCount(ConnectionsList.Count);
                 Log.WriteLog("Created connection for IP [{0}]", "green", conn.IpAddress);
 
                 ProtocolCore.SendHelloMessage(index);
@@ -124,157 +125,111 @@ namespace ConnectServer
             }
         }
 
-        public CSConnection GetInstance(int Index)
+        public Connection GetInstance(int Index)
         {
-            foreach (KeyValuePair<int, CSConnection> Item in ConnectionList)
+            foreach (KeyValuePair<int, Connection> Item in ConnectionList)
             {
                 if (Item.Key.Equals(Index))
                 {
                     return Item.Value;
                 }
             }
-            Log.WriteLog(String.Format("CSConnection Index: [{0}] Doesn't Exist.", Index));
+            Log.WriteLog(String.Format("Connection with index [{0}] is not existing.", "red", Index));
             return null;
         }
 
-        public void SendDataToGroupCSConnections(byte[] Data, int[] Index)
+        /// <summary>
+        /// Send data to multiple connections
+        /// </summary>
+        public void DataSend(byte[] Data, int[] cIndexes)
         {
-            if (ConnectionList.Count > 0)
-            {
-                if (Index.Length > 0)
-                {
-                    if (Data.Length > 0)
-                    {
-                        foreach (KeyValuePair<int, CSConnection> Item in ConnectionList)
-                        {
-                            foreach (int Elements in Index)
-                            {
-                                if (Item.Key.Equals(Elements))
-                                {
-                                    Item.Value.CSConnectionSocket.Send(Data, 0, Data.Length, SocketFlags.None);
+            if (ConnectionList.Count == 0 || cIndexes.Length == 0 || Data.Length == 0)
+                return;
 
-                                }
-                            }
-                        }
-                    }
-                }
+            foreach (var conn in ConnectionList.Where(wr => cIndexes.Contains(wr.Key)))
+                conn.Value.ConnectionSocket.Send(Data, 0, Data.Length, SocketFlags.None);
+        }
+
+        /// <summary>
+        /// Send data to specific connection
+        /// </summary>
+        /// <param name="cIndex">Connection index</param>
+        public void DataSend(byte[] Data, int cIndex)
+        {
+            if (ConnectionList.Count == 0 || Data.Length == 0)
+                return;
+
+            ConnectionList[cIndex].ConnectionSocket.Send(Data, 0, Data.Length, SocketFlags.None);
+        }
+
+        /// <summary>
+        /// Send data to all alive connections
+        /// </summary>
+        public void DataSendAll(byte[] Data)
+        {
+            if (ConnectionList.Count == 0 || Data.Length == 0)
+                return;
+
+            foreach (var conn in ConnectionList)
+            {
+                conn.Value.ConnectionSocket.Send(Data, 0, Data.Length, SocketFlags.None);
             }
         }
 
-        public bool SendDataToOneCSConnection(byte[] Data, int Index)
-        {
-            if (ConnectionList.Count > 0)
-            {
-                if (Data.Length > 0)
-                {
-                    foreach (KeyValuePair<int, CSConnection> Item in ConnectionList)
-                    {
-                        if (Item.Key.Equals(Index))
-                        {
-                            Item.Value.CSConnectionSocket.Send(Data, 0, Data.Length, SocketFlags.None);
-                            Log.WriteLog(String.Format("Sent Data to connection [{0}][{1}]", Index, MiscFunctions.ByteArrayToString(Data)));
-                            return true;
-                        }
-                    }
-                }
-            }
-
-            Log.WriteLog(String.Format("Can't Find Connection [{0}] Send Data To One CSConnection Fail", Index));
-            return false;
-        }
-
-        public void SendDataToAllCSConnections(byte[] Data)
-        {
-            if (ConnectionList.Count > 0)
-            {
-                if (Data.Length > 0)
-                {
-                    foreach (KeyValuePair<int, CSConnection> Item in ConnectionList)
-                    {
-                        Item.Value.CSConnectionSocket.Send(Data, 0, Data.Length, SocketFlags.None);
-                    }
-                }
-            }
-        }
-
-        public void CloseAllCSConnections()
+        public void KillAllConnections()
         {
             try
             {
-                Log.WriteLog(String.Format("Preparing To Dispose All CSConnection On Server Port[{0}]", Port));
-                foreach (KeyValuePair<int, CSConnection> Item in ConnectionList)
+                foreach (var conn in ConnectionList)
                 {
-                    if (Item.Value.CSConnectionSocket.Connected)
+                    if (conn.Value.ConnectionSocket.Connected)
                     {
-                        Item.Value.Close();
+                        conn.Value.Close();
                     }
                 }
                 ConnectionList.Clear();
-                Log.WriteLog("All CSConnections Disposed Sucessfully");
-                // FormControlUpdater.UpdateCSConnectionCount(CSConnectionsList.Count);
+                // FormControlUpdater.UpdateConnectionCount(ConnectionsList.Count);
             }
             catch (Exception Ex)
             {
-
-                Log.WriteLog(Ex.Message);
+                Log.WriteLog(Ex.Message, "red");
             }
         }
 
-        public void CloseCSConnection(int Index)
+        public void CloseConnection(int cIndex)
         {
             try
             {
-                foreach (KeyValuePair<int, CSConnection> Item in ConnectionList)
-                {
-                    if (Item.Key.Equals(Index))
-                    {
-                        if (Item.Value.CSConnectionSocket.Connected)
-                        {
-                            Item.Value.Close();
-                        }
-                    }
-                }
-                ConnectionList.Remove(Index);
-                Log.WriteLog(string.Format("Closed CSConnection Index[{0}]", Index));
+                ConnectionList[cIndex].Close();
+                ConnectionList.Remove(cIndex);
+
+                Log.WriteLog(string.Format("Closed Connection with index [{0}]", cIndex));
             }
             catch (Exception Ex)
             {
-
-                Log.WriteLog(Ex.Message);
+                Log.WriteLog(Ex.Message, "red");
             }
         }
 
-        public void CloseCSConnection(CSConnection CSConnection)
+        public void CloseConnection(Connection Connection)
         {
             try
             {
-                int TakeIndex = -1;
-                if (ConnectionList.Count > 0)
+                if (ConnectionList.Any(wr => wr.Value == Connection))
                 {
-                    foreach (KeyValuePair<int, CSConnection> Item in ConnectionList)
-                    {
-                        if (Item.Value.Equals(CSConnection))
-                        {
-                            if (Item.Value.CSConnectionSocket.Connected)
-                            {
+                    Connection.Close();
+                    ConnectionList.Remove(Connection.Index);
 
-                                Item.Value.Close();
-                            }
-                            TakeIndex = Item.Key;
-                        }
-                    }
-                    ConnectionList.Remove(TakeIndex);
-                    Log.WriteLog(string.Format("Closed CSConnection Index[{0}] ", TakeIndex));
-                    //FormControlUpdater.UpdateCSConnectionCount(CSConnectionsList.Count);
+                    Log.WriteLog(string.Format("Closed Connection with index [{0}] ", Connection.Index));
                 }
                 else
                 {
-                    Log.WriteLog("Trying To Close Not Existing CSConnection");
+                    Log.WriteLog("The connection can't be closed because is not existing.");
                 }
             }
             catch (Exception Ex)
             {
-                Log.WriteLog(Ex.Message);
+                Log.WriteLog(Ex.Message, "red");
             }
         }
     }

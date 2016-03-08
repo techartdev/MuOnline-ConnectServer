@@ -21,12 +21,27 @@ namespace ConnectServer
     /// </summary>
     public partial class MainWindow : Window
     {
-        public ConnectServer connectServer;
+        public CSSocket connectServer;
 
         public MainWindow()
         {
             InitializeComponent();
-            connectServer = new ConnectServer(IPAddress.Parse("192.168.1.50"), 44405, 20);
+            connectServer = new CSSocket(IPAddress.Parse("192.168.1.50"), 44405, 20);
+        }
+
+        private void startServer_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void stopServer_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void killConnections_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

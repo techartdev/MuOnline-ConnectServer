@@ -14,3 +14,14 @@ D:\MuNETProject\MuServer\ConnectServer\obj\Debug\ConnectServer.pdb
 D:\GitHub\MuOnline-ConnectServer\ConnectServer\bin\Debug\ConnectServer.exe.config
 D:\GitHub\MuOnline-ConnectServer\ConnectServer\obj\Debug\ConnectServer.exe
 D:\GitHub\MuOnline-ConnectServer\ConnectServer\obj\Debug\ConnectServer.pdb
+D:\GitHub\MuOnline-ConnectServer\ConnectServer\bin\Debug\ConnectServer.exe
+D:\GitHub\MuOnline-ConnectServer\ConnectServer\bin\Debug\ConnectServer.pdb
+D:\GitHub\MuOnline-ConnectServer\ConnectServer\obj\Debug\ConnectServer.csprojResolveAssemblyReference.cache
+D:\GitHub\MuOnline-ConnectServer\ConnectServer\obj\Debug\MainWindow.g.cs
+D:\GitHub\MuOnline-ConnectServer\ConnectServer\obj\Debug\App.g.cs
+D:\GitHub\MuOnline-ConnectServer\ConnectServer\obj\Debug\ConnectServer_MarkupCompile.cache
+D:\GitHub\MuOnline-ConnectServer\ConnectServer\obj\Debug\ConnectServer_MarkupCompile.lref
+D:\GitHub\MuOnline-ConnectServer\ConnectServer\obj\Debug\MainWindow.baml
+D:\GitHub\MuOnline-ConnectServer\ConnectServer\obj\Debug\ConnectServer.g.resources
+D:\GitHub\MuOnline-ConnectServer\ConnectServer\obj\Debug\ConnectServer.Properties.Resources.resources
+D:\GitHub\MuOnline-ConnectServer\ConnectServer\obj\Debug\ConnectServer.csproj.GenerateResource.Cache

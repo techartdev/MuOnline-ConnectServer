@@ -18,7 +18,7 @@ namespace ConnectServer
     {
         private static MainWindow mainWindow = (MainWindow)Application.Current.MainWindow;
         
-        public static void ProcessCSPacket(CSConnection Connection, byte[] DataBuffer)
+        public static void ProcessCSPacket(Connection conn, byte[] DataBuffer)
         {
             if (DataBuffer.Length < 3)
                 return;
@@ -122,13 +122,13 @@ namespace ConnectServer
                 //ServerList[2] = Macro.LOBYTE((ushort)ServerList.Length);
                 Application.Current.Dispatcher.Invoke(delegate
                 {
-                    mainWindow.connectServer.SendDataToOneCSConnection(ServerList, cIndex);
+                    mainWindow.connectServer.DataSend(ServerList, cIndex);
                 });
             }
             else
             {
                 Log.WriteLog("[ConnectServer] :: No active server!");
-                mainWindow.connectServer.CloseCSConnection(cIndex);
+                mainWindow.connectServer.CloseConnection(cIndex);
             }
 
         }
@@ -143,7 +143,7 @@ namespace ConnectServer
 
             Application.Current.Dispatcher.Invoke(delegate
             {
-                mainWindow.connectServer.SendDataToOneCSConnection(MiscFunctions.GetStructBytes(hello), cIndex);
+                mainWindow.connectServer.DataSend(MiscFunctions.GetStructBytes(hello), cIndex);
             });
         }
 
@@ -160,7 +160,7 @@ namespace ConnectServer
 
             Application.Current.Dispatcher.Invoke(delegate
             {
-                mainWindow.connectServer.SendDataToOneCSConnection(MiscFunctions.GetStructBytes(conInfo), cIndex);
+                mainWindow.connectServer.DataSend(MiscFunctions.GetStructBytes(conInfo), cIndex);
             });
         }
     }

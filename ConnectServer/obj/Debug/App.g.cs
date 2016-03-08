@@ -61,7 +61,7 @@ namespace ConnectServer {
         [System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [System.CodeDom.Compiler.GeneratedCodeAttribute("PresentationBuildTasks", "4.0.0.0")]
         public static void Main() {
-            App app = new App();
+            ConnectServer.App app = new ConnectServer.App();
             app.InitializeComponent();
             app.Run();
         }
