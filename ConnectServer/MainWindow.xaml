@@ -20,15 +20,46 @@
         <TextBlock HorizontalAlignment="Left" Margin="454,37,0,0" TextWrapping="Wrap" Text="Connected :" VerticalAlignment="Top"/>
         <TextBlock x:Name="connectedUsers" HorizontalAlignment="Left" Margin="522,37,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top"/>
 
-        <TabControl Margin="0,71,0,0">
+        <ListBox x:Name="serverList" HorizontalAlignment="Left" Margin="10,93,0,10" Width="207"/>
+
+        <TabControl Margin="222,71,10,10">
             <TabItem Header="Logs">
                 <Grid>
                     <RichTextBox x:Name="csLogsBox" Margin="10"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Configuration">
+                <Grid>
+                    <Border BorderBrush="#FFB0B0B0" BorderThickness="1" Height="106" Margin="10,10,10,0" VerticalAlignment="Top"/>
+                    <Border BorderBrush="#FFB0B0B0" BorderThickness="1" Height="180" Margin="10,134,10,0" VerticalAlignment="Top"/>
 
+                    <TextBlock HorizontalAlignment="Left" Margin="21,20,0,0" TextWrapping="Wrap" Text="Max Connections" VerticalAlignment="Top"/>
+                    <TextBox x:Name="maxConnections" HorizontalAlignment="Left" Height="23" Margin="21,41,0,0" TextWrapping="Wrap" Text="20" VerticalAlignment="Top" Width="135"/>
+
+                    <TextBlock HorizontalAlignment="Left" Margin="276,20,0,0" TextWrapping="Wrap" Text="IP Address" VerticalAlignment="Top"/>
+                    <TextBox x:Name="csIpAddress" HorizontalAlignment="Left" Height="23" Margin="276,41,0,0" TextWrapping="NoWrap" Text="192.168.1.50" VerticalAlignment="Top" Width="135"/>
+
+                    <Button x:Name="saveChanges" Content="Save Changes" HorizontalAlignment="Left" Margin="428,79,0,0" VerticalAlignment="Top" Width="93" Height="26" Click="saveChanges_Click"/>
+
+                    <TextBlock  HorizontalAlignment="Left" Margin="21,146,0,0" TextWrapping="Wrap" Text="Server Name" VerticalAlignment="Top"/>
+                    <TextBox x:Name="serverName" HorizontalAlignment="Left" Height="23" Margin="21,167,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="170"/>
+
+                    <TextBlock HorizontalAlignment="Left" Margin="276,146,0,0" TextWrapping="Wrap" Text="Server Code" VerticalAlignment="Top"/>
+                    <TextBox x:Name="serverCode" HorizontalAlignment="Left" Height="23" Margin="276,167,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="170"/>
+
+                    <TextBlock HorizontalAlignment="Left" Margin="21,204,0,0" TextWrapping="Wrap" Text="IP" VerticalAlignment="Top"/>
+                    <TextBox x:Name="serverIp" HorizontalAlignment="Left" Height="23" Margin="21,225,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="170"/>
+
+                    <TextBlock HorizontalAlignment="Left" Margin="276,204,0,0" TextWrapping="Wrap" Text="Port" VerticalAlignment="Top"/>
+                    <TextBox x:Name="serverPort" HorizontalAlignment="Left" Height="23" Margin="276,225,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="170"/>
+                    
+                    <RadioButton x:Name="showServer" Content="Show" IsChecked="True" HorizontalAlignment="Left" Margin="27,266,0,0" VerticalAlignment="Top"/>
+                    <RadioButton Content="Hide" HorizontalAlignment="Left" Margin="27,289,0,0" VerticalAlignment="Top"/>
+
+                    <Button x:Name="addServer" Content="Add Server" HorizontalAlignment="Left" Margin="428,278,0,0" VerticalAlignment="Top" Width="93" Height="26" Click="addServer_Click"/>
+                </Grid>
             </TabItem>
         </TabControl>
+        <TextBlock HorizontalAlignment="Left" Margin="10,74,0,0" TextWrapping="Wrap" Text="Server List" VerticalAlignment="Top"/>
     </Grid>
 </Window>

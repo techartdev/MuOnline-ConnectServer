@@ -1,0 +1,17 @@
+﻿<UserControl x:Class="ConnectServer.GameServerItem"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ConnectServer"
+             mc:Ignorable="d" d:DesignWidth="200" Height="55.297">
+    <UserControl.Resources>
+        <local:StatusConverter x:Key="statusConverter" />
+    </UserControl.Resources>
+    <Grid>
+        <TextBlock Margin="21,10,0,0" TextWrapping="Wrap" Text="{Binding ServerName}" VerticalAlignment="Top" HorizontalAlignment="Left" Width="119"/>
+        <ProgressBar Value="{Binding Percent}" HorizontalAlignment="Left" Height="10" Margin="10,31,0,0" VerticalAlignment="Top" Width="180"/>
+        <TextBlock x:Name="textBlock" HorizontalAlignment="Left" Margin="140,10,0,0" TextWrapping="Wrap" Text="{Binding UsersInfo}" VerticalAlignment="Top"/>
+        <Grid HorizontalAlignment="Left" Height="6" Margin="10,16,0,0" VerticalAlignment="Top" Width="6" Background="{Binding IsAlive,Converter={StaticResource statusConverter} }"/>
+    </Grid>
+</UserControl>

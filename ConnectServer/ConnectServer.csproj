@@ -55,10 +55,20 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="GameServerItem.xaml.cs">
+      <DependentUpon>GameServerItem.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Misc\InvokeUI.cs" />
     <Compile Include="Misc\Logs.cs" />
     <Compile Include="Protocol\ProtocolCore.cs" />
     <Compile Include="Network\Socket.cs" />
     <Compile Include="Protocol\Structs.cs" />
+    <Compile Include="Network\UDPSocket.cs" />
+    <Compile Include="StatusConverter.cs" />
+    <Page Include="GameServerItem.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

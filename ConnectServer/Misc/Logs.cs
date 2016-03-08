@@ -32,6 +32,8 @@ namespace ConnectServer
                     bc.ConvertFromString(color));
             }
             catch (FormatException) { }
+
+            box.ScrollToEnd();
         }
     }
 }

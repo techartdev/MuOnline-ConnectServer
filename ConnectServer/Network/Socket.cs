@@ -14,7 +14,7 @@ namespace ConnectServer
     {
         #region Public Properties
         public int Port { get; set; }
-        
+
         public int MaxConnections { get; set; }
 
         public Dictionary<int, Connection> ConnectionList { get; set; }
@@ -22,12 +22,14 @@ namespace ConnectServer
         public IPAddress IPAddress { get; set; }
 
         public bool SendHello { get; set; }
-        
+
         public bool WriteLogs { get; set; }
-        
+
         public bool WriteDebugLogs { get; set; }
 
         public ProtocolType ProtocolType { get; set; }
+
+        public bool AllowConnect { get; set; }
         #endregion
 
         #region Private Properties
@@ -61,9 +63,7 @@ namespace ConnectServer
 
                 SocketServer.Listen(10);
 
-                //FormControlUpdater.UpdateServerStatus(1);
-                //FormControlUpdater.UpdateConnectionCount(ConnectionsList.Count);
-
+                InvokeUI.UpdateConnectionsCount(ConnectionList.Count);
 
                 SocketServer.BeginAccept(new AsyncCallback(OnConnect), SocketServer);
                 if (WriteLogs)
@@ -117,11 +117,16 @@ namespace ConnectServer
                         if (WriteLogs)
                             Logs.WriteLog("black", "Refused Connection from IP [{0}] because the maximum connections count [{1}] is reached.", connectionIP, MaxConnections);
                     }
+                    else if (!AllowConnect)
+                    {
+                        socket.Close();
+                        if (WriteLogs)
+                            Logs.WriteLog("black", "Join server is offline ! Connection closed for IP [{0}]", connectionIP);
+                    }
                     else
                     {
                         CreateConnection(socket);
                     }
-
                 }
                 catch (Exception Ex)
                 {
@@ -129,7 +134,10 @@ namespace ConnectServer
                         Logs.WriteLog("red", Ex.Message);
                 }
 
-                SocketServer.BeginAccept(new AsyncCallback(OnConnect), SocketServer);
+                if (SocketServer != null)
+                {
+                    SocketServer.BeginAccept(new AsyncCallback(OnConnect), SocketServer);
+                }
             }
         }
 
@@ -142,7 +150,8 @@ namespace ConnectServer
                 conn.cIndex = index;
                 ConnectionList.Add(index, conn);
                 conn.StartReceiveData();
-                //FormControlUpdater.UpdateConnectionCount(ConnectionsList.Count);
+                InvokeUI.UpdateConnectionsCount(ConnectionList.Count);
+
                 if (WriteLogs)
                     Logs.WriteLog("green", "Created connection for IP [{0}]", conn.IpAddress);
 
@@ -211,7 +220,7 @@ namespace ConnectServer
                     }
                 }
                 ConnectionList.Clear();
-                // FormControlUpdater.UpdateConnectionCount(ConnectionsList.Count);
+                InvokeUI.UpdateConnectionsCount(ConnectionList.Count);
             }
             catch (Exception Ex)
             {
@@ -232,6 +241,8 @@ namespace ConnectServer
                 ConnectionList.Remove(cIndex);
                 if (WriteLogs)
                     Logs.WriteLog("black", "Closed Connection with index [{0}]", cIndex);
+
+                InvokeUI.UpdateConnectionsCount(ConnectionList.Count);
             }
             catch (Exception Ex)
             {
@@ -255,12 +266,10 @@ namespace ConnectServer
 
                     if (WriteLogs)
                         Logs.WriteLog("black", "Closed Connection with index [{0}] ", Connection.cIndex);
+
                 }
-                else
-                {
-                    if (WriteLogs)
-                        Logs.WriteLog("black", "The connection can't be closed because is not existing.");
-                }
+
+                InvokeUI.UpdateConnectionsCount(ConnectionList.Count);
             }
             catch (Exception Ex)
             {

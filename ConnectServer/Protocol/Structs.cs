@@ -28,30 +28,6 @@ namespace ConnectServer
         public byte HeadCode;
     };
 
-    struct PWMSG_HEAD
-    {
-        public void Set(byte headCode, byte size)
-        {
-            c = 0xC2;
-            HeadCode = headCode;
-            SizeH = Helpers.SET_NUMBERH(size);
-            SizeL = Helpers.SET_NUMBERL(size);
-        }
-
-        public void SetE(byte headCode, byte size)
-        {
-            c = 0xC4;
-            HeadCode = headCode;
-            SizeH = Helpers.SET_NUMBERH(size);
-            SizeL = Helpers.SET_NUMBERL(size);
-        }
-
-        byte c;
-        byte SizeH;
-        byte SizeL;
-        byte HeadCode;
-    };
-
     public struct PMSG_HELLO
     {
         public PBMSG_HEAD Head;
@@ -88,21 +64,24 @@ namespace ConnectServer
         public _SERVER[] Server;
     };
 
-    struct ServerInfo
+    public struct PMSG_SERVERINFO
     {
-        ushort ServerCode;
-        byte Percent;
-        byte UNK;
+        public PBMSG_HEAD Head;   // C1:01
+        public short ServerCode;   // 4
+        public byte Percent;   // 6
+        public short UserCount;    // 8
+        public short AccountCount; // A
+        public short PCbangCount;  // C
+        public short MaxUserCount; // E
     };
 
-    struct ServerList
+    public struct JoinServerUDPMSG
     {
-        PWMSG_HEAD h;
-        byte SubHead;
-        byte ServersCountH;
-        byte ServersCountL;
-
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 361)]
-        ServerInfo[] Servers;
-    };
+        public PBMSG_HEAD Head;
+        public byte Unk1;
+        public byte Unk2;
+        public byte Unk3;
+        public byte Unk4;
+        public byte Unk5;
+    }
 }

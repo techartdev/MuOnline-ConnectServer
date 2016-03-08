@@ -55,6 +55,21 @@ namespace ConnectServer
             return arr;
         }
 
+        public static T GetStructFromArray<T>(byte[] arr)
+        {
+            T str = (T)Activator.CreateInstance(typeof(T));
+
+            int size = Marshal.SizeOf(str);
+            IntPtr ptr = Marshal.AllocHGlobal(size);
+
+            Marshal.Copy(arr, 0, ptr, size);
+
+            str = (T)Marshal.PtrToStructure(ptr, str.GetType());
+            Marshal.FreeHGlobal(ptr);
+
+            return str;
+        }
+
         public static string ByteArrayToString(byte[] Array)
         {
             StringBuilder HexString = new StringBuilder(Array.Length * 2);

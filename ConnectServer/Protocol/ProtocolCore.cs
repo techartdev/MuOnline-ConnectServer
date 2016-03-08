@@ -16,8 +16,6 @@ namespace ConnectServer
 
     public static class ProtocolCore
     {
-        private static MainWindow mainWindow = (MainWindow)Application.Current.MainWindow;
-
         public static void ProcessCSPacket(Connection conn, byte[] DataBuffer)
         {
             if (DataBuffer.Length < 3)
@@ -41,10 +39,10 @@ namespace ConnectServer
                     switch (DataBuffer[3])
                     {
                         case (byte)CSHeaders.CS_SERVER_SELECT:
-                            //JoinGame.SendServerInfo(Connection.Index, DataBuffer);
+                            SendServerInfo(conn.cIndex, DataBuffer);
                             break;
                         case (byte)CSHeaders.CS_CLIENT_CONNECT:
-                            //JoinGame.SendServerList(Connection.Index, DataBuffer);
+                            SendServerList(conn.cIndex, DataBuffer);
                             break;
                         case 0x07:
                             //sub_40B160(a4);
@@ -68,6 +66,47 @@ namespace ConnectServer
                     break;
                 default:
                     return;
+            }
+        }
+
+        public static void ProcessUDPPacket(byte[] DataBuffer)
+        {
+            //Recived Data : [0xc1 0x10 0x01 0x08 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x64 0x00 ]
+            //Recived Data : [0xc1 0x08 0x02 0x00 0x00 0x00 0x00 0x00 ] //JoinServer
+
+            switch (DataBuffer[2])
+            {
+                case 0x01:
+                    ParseGameServerInfo(DataBuffer);
+                    break;
+                case 0x02:
+                    ParseJoinServerPacket(DataBuffer);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        public static void ParseJoinServerPacket(byte[] Data)
+        {
+            JoinServerUDPMSG jsMsg = Helpers.GetStructFromArray<JoinServerUDPMSG>(Data);
+
+            InvokeUI.MainWindowInstance.JoinServerAlive = true;
+        }
+
+        public static void ParseGameServerInfo(byte[] Data)
+        {
+            PMSG_SERVERINFO serverInfo = Helpers.GetStructFromArray<PMSG_SERVERINFO>(Data);
+
+            MainWindow window = InvokeUI.MainWindowInstance;
+            if (window.GSList.Any(wr => wr.ServerCode == serverInfo.ServerCode))
+            {
+                window.GSList.First(wr => wr.ServerCode == serverInfo.ServerCode).IsAlive = true;
+                window.GSList.First(wr => wr.ServerCode == serverInfo.ServerCode).Percent = serverInfo.Percent;
+                window.GSList.First(wr => wr.ServerCode == serverInfo.ServerCode).AccountCount = serverInfo.AccountCount;
+                window.GSList.First(wr => wr.ServerCode == serverInfo.ServerCode).PCbangCount = serverInfo.PCbangCount;
+                window.GSList.First(wr => wr.ServerCode == serverInfo.ServerCode).MaxUserCount = serverInfo.MaxUserCount;
+                window.GSList.First(wr => wr.ServerCode == serverInfo.ServerCode).UserCount = serverInfo.UserCount;
             }
         }
 
@@ -122,13 +161,16 @@ namespace ConnectServer
                 //ServerList[2] = Macro.LOBYTE((ushort)ServerList.Length);
                 Application.Current.Dispatcher.Invoke(delegate
                 {
-                    mainWindow.connectServer.DataSend(ServerList, cIndex);
+                    InvokeUI.MainWindowInstance.connectServer.DataSend(ServerList, cIndex);
                 });
             }
             else
             {
                 Logs.WriteLog("black", "[ConnectServer] :: No active server!");
-                mainWindow.connectServer.CloseConnection(cIndex);
+                Application.Current.Dispatcher.Invoke(delegate
+                {
+                    InvokeUI.MainWindowInstance.connectServer.CloseConnection(cIndex);
+                });
             }
 
         }
@@ -143,7 +185,7 @@ namespace ConnectServer
 
             Application.Current.Dispatcher.Invoke(delegate
             {
-                mainWindow.connectServer.DataSend(Helpers.GetStructBytes(hello), cIndex);
+                InvokeUI.MainWindowInstance.connectServer.DataSend(Helpers.GetStructBytes(hello), cIndex);
             });
         }
 
@@ -160,7 +202,7 @@ namespace ConnectServer
 
             Application.Current.Dispatcher.Invoke(delegate
             {
-                mainWindow.connectServer.DataSend(Helpers.GetStructBytes(conInfo), cIndex);
+                InvokeUI.MainWindowInstance.connectServer.DataSend(Helpers.GetStructBytes(conInfo), cIndex);
             });
         }
     }

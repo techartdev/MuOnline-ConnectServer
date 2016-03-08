@@ -72,7 +72,10 @@ namespace ConnectServer
                     {
                         Logs.WriteLog("red", "Lost Connection with index [{0}]. Closing Connection..", cIndex);
                         Logs.WriteLog("red", Ex.Message);
+                        
                     }
+
+                    ParentServer.ConnectionList.Remove(cIndex);
                     this.Close();
                 }
             }
