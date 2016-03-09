@@ -157,7 +157,34 @@ namespace ConnectServer
 
         private void ServerTimer_Tick(object sender, EventArgs e)
         {
+            if (JoinServerAlive)
+            {
+                JoinServerAlive = false;
 
+                if (!connectServer.AllowConnect)
+                    connectServer.AllowConnect = true;
+            }
+            else
+            {
+                connectServer.AllowConnect = false;
+            }
+
+            foreach (GameServerItem gsi in GSList)
+            {
+                if (gsi.IsAlive)
+                {
+                    gsi.IsAlive = false;
+
+                    if (!gsi.IsOnline)
+                    {
+                        gsi.IsOnline = true;
+                    }
+                }
+                else
+                {
+                    gsi.IsOnline = false;
+                }
+            }
         }
 
         private void startServer_Click(object sender, RoutedEventArgs e)
@@ -172,6 +199,7 @@ namespace ConnectServer
             TCPRecv.Start();
             udpServer.Start();
             serverStatus.Background = Brushes.Green;
+            serverTimer.Start();
         }
 
         private void stopServer_Click(object sender, RoutedEventArgs e)
@@ -180,6 +208,7 @@ namespace ConnectServer
             TCPRecv.Stop();
             udpServer.Stop();
             serverStatus.Background = Brushes.Red;
+            serverTimer.Stop();
         }
 
         private void killConnections_Click(object sender, RoutedEventArgs e)
@@ -212,7 +241,7 @@ namespace ConnectServer
                     ServerCode = Convert.ToInt32(serverCode.Text),
                     IPAddress = IPAddress.Parse(serverIp.Text),
                     Port = Convert.ToInt32(serverPort.Text),
-                    IsHidden = showServer.IsChecked.Value
+                    IsHidden = hideServer.IsChecked.Value
                 };
 
                 GSList.Add(gsitem);
@@ -242,7 +271,7 @@ namespace ConnectServer
                 gsitem.ServerCode = Convert.ToInt32(serverCode.Text);
                 gsitem.IPAddress = IPAddress.Parse(serverIp.Text);
                 gsitem.Port = Convert.ToInt32(serverPort.Text);
-                gsitem.IsHidden = showServer.IsChecked.Value;
+                gsitem.IsHidden = hideServer.IsChecked.Value;
 
                 GSList.RemoveAt(index);
                 GSList.Insert(index, gsitem);
@@ -273,8 +302,8 @@ namespace ConnectServer
             serverCode.Text = gsi.ServerCode.ToString();
             serverIp.Text = gsi.IPAddress.ToString();
             serverPort.Text = gsi.Port.ToString();
-            showServer.IsChecked = gsi.IsHidden;
-            hideServer.IsChecked = !gsi.IsHidden;
+            showServer.IsChecked = !gsi.IsHidden;
+            hideServer.IsChecked = gsi.IsHidden;
 
             addServer.Content = "Save Changes";
             editingServer = true;
@@ -294,8 +323,8 @@ namespace ConnectServer
             serverCode.Text = gsi.ServerCode.ToString();
             serverIp.Text = gsi.IPAddress.ToString();
             serverPort.Text = gsi.Port.ToString();
-            showServer.IsChecked = gsi.IsHidden;
-            hideServer.IsChecked = !gsi.IsHidden;
+            showServer.IsChecked = !gsi.IsHidden;
+            hideServer.IsChecked = gsi.IsHidden;
 
             addServer.Content = "Save Changes";
             editingServer = true;

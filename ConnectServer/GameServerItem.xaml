@@ -12,6 +12,6 @@
         <TextBlock Margin="21,10,0,0" TextWrapping="Wrap" Text="{Binding ServerName}" VerticalAlignment="Top" HorizontalAlignment="Left" Width="119"/>
         <ProgressBar Value="{Binding Percent}" HorizontalAlignment="Left" Height="10" Margin="10,31,0,0" VerticalAlignment="Top" Width="180"/>
         <TextBlock x:Name="textBlock" HorizontalAlignment="Left" Margin="140,10,0,0" TextWrapping="Wrap" Text="{Binding UsersInfo}" VerticalAlignment="Top"/>
-        <Grid HorizontalAlignment="Left" Height="6" Margin="10,16,0,0" VerticalAlignment="Top" Width="6" Background="{Binding IsAlive,Converter={StaticResource statusConverter} }"/>
+        <Grid HorizontalAlignment="Left" Height="6" Margin="10,16,0,0" VerticalAlignment="Top" Width="6" Background="{Binding IsOnline,Converter={StaticResource statusConverter} }"/>
     </Grid>
 </UserControl>

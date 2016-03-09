@@ -26,7 +26,7 @@ namespace ConnectServer
         private string _serverName = "";
         private int _percent = 0;
         private short _userCount = 0;
-        private bool _isAlive = false;
+        private bool _isOnline = false;
         #endregion
 
         #region Public Properties
@@ -49,16 +49,18 @@ namespace ConnectServer
 
         public int Port { get; set; }
 
-        public bool IsAlive
+        public bool IsAlive { get; set; }
+
+        public bool IsOnline
         {
             get
             {
-                return _isAlive;
+                return _isOnline;
             }
             set
             {
-                _isAlive = value;
-                OnPropertyChanged("IsAlive");
+                _isOnline = value;
+                OnPropertyChanged("IsOnline");
             }
         }
 

@@ -102,6 +102,7 @@ namespace ConnectServer
             if (window.GSList.Any(wr => wr.ServerCode == serverInfo.ServerCode))
             {
                 window.GSList.First(wr => wr.ServerCode == serverInfo.ServerCode).IsAlive = true;
+                window.GSList.First(wr => wr.ServerCode == serverInfo.ServerCode).IsOnline = true;
                 window.GSList.First(wr => wr.ServerCode == serverInfo.ServerCode).Percent = serverInfo.Percent;
                 window.GSList.First(wr => wr.ServerCode == serverInfo.ServerCode).AccountCount = serverInfo.AccountCount;
                 window.GSList.First(wr => wr.ServerCode == serverInfo.ServerCode).PCbangCount = serverInfo.PCbangCount;
@@ -112,21 +113,18 @@ namespace ConnectServer
 
         public static void SendServerList(int cIndex, byte[] data)
         {
-            _SERVER lpServer = new _SERVER();
-            lpServer.ServerCode = 1;
-            lpServer.Status = true;
-            lpServer.IP = "192.168.1.50";
-            lpServer.Port = 55901;
+            //_SERVER lpServer = new _SERVER();
+            //lpServer.ServerCode = 1;
+            //lpServer.Status = true;
+            //lpServer.IP = "192.168.1.50";
+            //lpServer.Port = 55901;
 
-            _SERVERS servers = new _SERVERS();
-            servers.Count = 1;
-            servers.Group = 1;
-            servers.Server = new _SERVER[5];
-            servers.Server[0] = lpServer;
+            MainWindow mainWindow = InvokeUI.MainWindowInstance;
 
-            byte[] ServerList = new byte[servers.Count * 4 + 7]; // server count * 4 + 7
-            //int Percent = 0;
-            //ushort Count = 0;
+            List<GameServerItem> gsList = mainWindow.GSList;
+
+
+            byte[] ServerList = new byte[gsList.Count * 4 + 7]; // server count * 4 + 7
 
             ServerList[0] = 0xC2;
             ServerList[1] = 0x00;
@@ -134,8 +132,38 @@ namespace ConnectServer
             ServerList[3] = 0xF4;
             ServerList[4] = 0x06;
             ServerList[5] = 0x00;
-            ServerList[6] = 0x01;
-            ServerList[9] = 0x01;
+            //ServerList[6] = 0x01;
+            //ServerList[9] = 0x01;
+
+            _SERVERS servers = new _SERVERS();
+            servers.Count = (ushort)gsList.Count;
+            servers.Group = 1;
+            servers.Server = new _SERVER[5];
+
+            int cnt = 0;
+            foreach (GameServerItem gsi in gsList)
+            {
+                if (gsi.IsOnline && !gsi.IsHidden)
+                {
+                    _SERVER lpServer = new _SERVER();
+                    lpServer.ServerCode = (ushort)gsi.ServerCode;
+                    lpServer.Status = gsi.IsOnline;
+                    lpServer.IP = gsi.IPAddress.ToString();
+                    lpServer.Port = (ushort)gsi.Port;
+
+                    ServerList[cnt * 4 + 9] = (byte)gsi.Percent;
+                    ServerList[6]++;
+
+                    servers.Server[cnt] = lpServer;
+                    cnt++;
+                }
+                else
+                {
+                    ServerList = Helpers.SubByteArray(ServerList, ServerList.Length - 4);
+                }
+            }
+
+
             //for (int n = 0; n < servers.Group; n++)
             //{
             //    for (int i = 0; i < servers.Count; i++)
@@ -144,7 +172,7 @@ namespace ConnectServer
             //        if ((serv.Status) && (Percent != -1))
             //        {
             //            Buffer.BlockCopy(BitConverter.GetBytes(serv.ServerCode), 0, ServerList, Count * 4 + 7, 2);
-            //            ServerList[Count * 4 + 9] = (byte)Percent;
+            //            ServerList[gsList.Count * 4 + 9] = (byte)Percent;
             //            ServerList[6]++;
             //            Count++;
             //        }
@@ -157,8 +185,8 @@ namespace ConnectServer
 
             if (ServerList[6] > 0)
             {
-                ///ServerList[1] = Macro.HIBYTE((ushort)ServerList.Length);
-                //ServerList[2] = Macro.LOBYTE((ushort)ServerList.Length);
+                ServerList[1] = Helpers.HIBYTE((ushort)ServerList.Length);
+                ServerList[2] = Helpers.LOBYTE((ushort)ServerList.Length);
                 Application.Current.Dispatcher.Invoke(delegate
                 {
                     InvokeUI.MainWindowInstance.connectServer.DataSend(ServerList, cIndex);

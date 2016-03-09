@@ -87,5 +87,15 @@ namespace ConnectServer
         {
             return (byte)((x) & 0xFF);
         }
+
+        public static byte LOBYTE(UInt16 a)
+        {
+            return (byte)(a & 0xff);
+        }
+
+        public static byte HIBYTE(UInt16 a)
+        {
+            return (byte)(a >> 8);
+        }
     }
 }
