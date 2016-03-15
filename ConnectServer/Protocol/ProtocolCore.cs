@@ -113,12 +113,6 @@ namespace ConnectServer
 
         public static void SendServerList(int cIndex, byte[] data)
         {
-            //_SERVER lpServer = new _SERVER();
-            //lpServer.ServerCode = 1;
-            //lpServer.Status = true;
-            //lpServer.IP = "192.168.1.50";
-            //lpServer.Port = 55901;
-
             MainWindow mainWindow = InvokeUI.MainWindowInstance;
 
             List<GameServerItem> gsList = mainWindow.GSList;
@@ -132,8 +126,6 @@ namespace ConnectServer
             ServerList[3] = 0xF4;
             ServerList[4] = 0x06;
             ServerList[5] = 0x00;
-            //ServerList[6] = 0x01;
-            //ServerList[9] = 0x01;
 
             _SERVERS servers = new _SERVERS();
             servers.Count = (ushort)gsList.Count;
@@ -163,26 +155,6 @@ namespace ConnectServer
                 }
             }
 
-
-            //for (int n = 0; n < servers.Group; n++)
-            //{
-            //    for (int i = 0; i < servers.Count; i++)
-            //    {
-            //        _SERVER serv = servers.Server[n];
-            //        if ((serv.Status) && (Percent != -1))
-            //        {
-            //            Buffer.BlockCopy(BitConverter.GetBytes(serv.ServerCode), 0, ServerList, Count * 4 + 7, 2);
-            //            ServerList[gsList.Count * 4 + 9] = (byte)Percent;
-            //            ServerList[6]++;
-            //            Count++;
-            //        }
-            //        else
-            //        {
-            //            ServerList = MiscFunctions.SubByteArray(ServerList, ServerList.Length - 4);
-            //        }
-            //    }
-            //}
-
             if (ServerList[6] > 0)
             {
                 ServerList[1] = Helpers.HIBYTE((ushort)ServerList.Length);
@@ -195,6 +167,7 @@ namespace ConnectServer
             else
             {
                 Logs.WriteLog("black", "[ConnectServer] :: No active server!");
+
                 Application.Current.Dispatcher.Invoke(delegate
                 {
                     InvokeUI.MainWindowInstance.connectServer.CloseConnection(cIndex);
